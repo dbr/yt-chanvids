@@ -86,7 +86,7 @@ impl YtVideoDetailScraper {
 
                 let j: serde_json::Value = serde_json::from_str(&json_src).unwrap();
                 fn dec(x: &serde_json::Value) -> String {
-                    urlencoding::decode(x.as_str().unwrap()).unwrap()
+                    x.as_str().unwrap().into()
                 }
                 return VideoDetail {
                     title: dec(&j["videoDetails"]["title"]),
