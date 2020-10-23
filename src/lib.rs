@@ -1,3 +1,5 @@
+#![deny(unsafe_code)]
+
 pub struct ChannelDetail {
     pub title: String,
     pub author_thumbnail: String,
