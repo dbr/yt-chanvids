@@ -28,7 +28,7 @@ impl YtChannelDetailScraper {
         for url in vec![url_chan, url_user] {
             let res = attohttpc::get(&url)
                 .header("x-youtube-client-name", "1")
-                .header("x-youtube-client-version", "2.20170927")
+                .header("x-youtube-client-version", "2.20201021.03.00")
                 .send()
                 .unwrap();
             if res.is_success() {
@@ -215,25 +215,30 @@ impl YtUploadsCrawler {
      */
     fn collect_links(&mut self, items: &serde_json::Value) {
         for item in items.as_array().unwrap().iter().rev() {
-            // dbg!(item);
-            let video_id = item["gridVideoRenderer"]["videoId"].as_str().unwrap();
-            let info = VideoInfo {
-                id: video_id.into(),
-                url: make_youtube_video_url(video_id),
-                title: item["gridVideoRenderer"]["title"]["runs"][0]["text"]
-                    .as_str()
-                    .unwrap_or(
-                        item["gridVideoRenderer"]["title"]["simpleText"]
-                            .as_str()
-                            .unwrap_or(""),
-                    )
-                    .into(),
-                thumbnail: item["gridVideoRenderer"]["thumbnail"]["thumbnails"][0]["url"]
-                    .as_str()
-                    .unwrap_or("")
-                    .into(),
-            };
-            self.links.push(info);
+            if item["gridVideoRenderer"].is_null() {
+                self.next_continuation = item["continuationItemRenderer"]["continuationEndpoint"]
+                    ["continuationCommand"]["token"]
+                    .clone();
+            } else {
+                let video_id = item["gridVideoRenderer"]["videoId"].as_str().unwrap();
+                let info = VideoInfo {
+                    id: video_id.into(),
+                    url: make_youtube_video_url(video_id),
+                    title: item["gridVideoRenderer"]["title"]["runs"][0]["text"]
+                        .as_str()
+                        .unwrap_or(
+                            item["gridVideoRenderer"]["title"]["simpleText"]
+                                .as_str()
+                                .unwrap_or(""),
+                        )
+                        .into(),
+                    thumbnail: item["gridVideoRenderer"]["thumbnail"]["thumbnails"][0]["url"]
+                        .as_str()
+                        .unwrap_or("")
+                        .into(),
+                };
+                self.links.push(info);
+            }
         }
     }
 
