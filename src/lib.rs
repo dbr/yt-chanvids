@@ -76,10 +76,10 @@ impl YtVideoDetailScraper {
 
     pub fn get(&self) -> VideoDetail {
         let url = format!(
-            "https://www.youtube.com/get_video_info?video_id={}",
+            "https://www.youtube.com/get_video_info?html5=1&video_id={}",
             self.id
         );
-        let response = attohttpc::get(url).send().unwrap();
+        let response = attohttpc::get(&url).send().unwrap();
         let text = response.text().unwrap();
         for chunk in text.split("&") {
             if chunk.starts_with("player_response=") {
